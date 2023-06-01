@@ -30,9 +30,9 @@ public class Response {
         else if (request.getString("type").equals("view game list")){
             return gameList(statement, request);
         }
-//        else if (request.getString("type").equals("download")){
-//            return downloadResponse(request,statement);
-//        }
+        else if (request.getString("type").equals("download")){
+            return downloadResponse(request,statement);
+        }
 
         return null;
     }
@@ -201,4 +201,62 @@ public class Response {
         return res.toString();
     }
 //    public static String downloadResponse
+
+    public static String downloadResponse(JSONObject request,Statement statement) throws SQLException {
+        insertDownload(request,statement,downloadCount(request,statement));
+        JSONObject json = new JSONObject();
+        json.put("type","menu");
+        json.put("user", request.getJSONObject("user"));
+
+        String id = request.getString("id");
+
+        String path = "C:\\Users\\astan\\Eighth-Assignment-Steam\\src\\main\\java\\Client\\Downloads\\";
+        File folder = new File(path);
+        File[] listOfFiles = folder.listFiles();
+        ArrayList<String> fileNames = new ArrayList<>();
+
+        for (File file:listOfFiles){
+            if (file.getName().endsWith(".png")) {
+                fileNames.add(file.getName().substring(0,file.getName().length() - 4));
+            }
+        }
+
+        int i = 1;
+        String id1 = id;
+        while (fileNames.contains(id)){
+            id = id1 + " (" + i + ")";
+            i++;
+        }
+        return json.toString();
+
+    }
+
+    public static void insertDownload(JSONObject request, Statement statement, int download_count) throws SQLException {
+        JSONObject user = request.getJSONObject("user");
+        String sql = "";
+
+        if (download_count  == 0) {
+            sql = "INSERT INTO downloads VALUES ('" + user.getString("id") + "','" + request.getString("id") + "','" + 1 + "')";
+        }
+        else {
+            sql = "UPDATE downloads SET download_count = " + (download_count + 1) + " WHERE account_id = '" + user.getString("id") + "' AND game_id = '" + request.getString("id") + "'";
+        }
+        statement.executeUpdate(sql);
+    }
+
+    public static int downloadCount(JSONObject request,Statement statement) throws SQLException {
+        ResultSet result = statement.executeQuery("SELECT COUNT(*) FROM downloads WHERE account_id = '" + request.getJSONObject("user").getString("id") + "' AND game_id = '" + request.getString("id") + "'");
+        result.next();
+
+        if (result.getInt("count") == 0){
+            return 0;
+        }
+
+        else{
+            result = statement.executeQuery("SELECT * FROM downloads WHERE account_id = '" + request.getJSONObject("user").getString("id") + "' AND game_id = '" + request.getString("id") + "'");
+            result.next();
+
+            return result.getInt("download_count");
+        }
+    }
 }

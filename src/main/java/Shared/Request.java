@@ -47,13 +47,12 @@ public class Request {
 
         else if (response.getString("type").equals("details")){
             printDetails(response);
-            System.out.println("Do you want to download this game?\n1. yes   2. no");
+            System.out.println("\nDo you want to download this game?\n1. yes   2. no");
             int x = Integer.parseInt(scan.nextLine());
-            if (x == 1){
-                //return downloadGameRequest(response.getString("id"),response);
-            } else{
-                return menuReq(response);
+            if (x == 1) {
+                return downloadGameRequest(response.getString("id"), response);
             }
+            return menuReq(response);
         }
 
         else if (response.getString("type").equals("search")){
@@ -192,8 +191,16 @@ public class Request {
         int x = Integer.parseInt(scan.nextLine());
         String id = gamesIds.get(x - 1);
 
-        return detailsReq(id,response);
+        System.out.println("1. Download   2. Details");
+        int ch = Integer.parseInt(scan.nextLine());
 
+        if (ch == 1){
+            return downloadGameRequest(id,response);
+        } else if (ch == 2) {
+            return detailsReq(id,response);
+        }
+
+        return menuReq(response);
     }
 
     private static void printDetails(JSONObject object) {
@@ -210,12 +217,12 @@ public class Request {
     }
 
 
-//    private static String downloadGameRequest(String id, JSONObject resp) {
-//
-//        JSONObject object = new JSONObject();
-//        object.put("type", "download");
-//        object.put("user",resp.getJSONObject("user"));
-//        object.put("id",id);
-//        return object.toString();
-//    }
+    private static String downloadGameRequest(String id, JSONObject resp) {
+
+        JSONObject object = new JSONObject();
+        object.put("type", "download");
+        object.put("user",resp.getJSONObject("user"));
+        object.put("id",id);
+        return object.toString();
+    }
 }

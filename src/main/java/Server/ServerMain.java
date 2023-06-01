@@ -73,7 +73,7 @@ public class ServerMain {
                             clients.remove(this);
                         }
                         else if (jsonRequest.getString("type").equals("download")) {
-                            //SendFiles(new JSONObject(request).getString("id"), socket);
+                            SendFiles(new JSONObject(request).getString("id"), socket);
                         }
                         String response = Response.responseCreator(jsonRequest, statement);
                         this.out.println(response);
@@ -105,5 +105,27 @@ public class ServerMain {
         return connection;
     }
     //public static void SendFiles
+
+    public static void SendFiles(String id, Socket socket) throws IOException {
+
+        String path = "C:\\Users\\astan\\Eighth-Assignment-Steam\\src\\main\\java\\Server\\Resources\\";
+        int bytes = 0;
+
+        File file = new File(path + id + ".png");
+
+        FileInputStream fileInputStream = new FileInputStream(file);
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
+        DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+
+        dataOutputStream.writeLong(file.length());
+
+        byte[] buffer = new byte[1024];
+        while ((bytes = bufferedInputStream.read(buffer)) != -1) {
+
+            dataOutputStream.write(buffer,0, bytes);
+            dataOutputStream.flush();
+        }
+        fileInputStream.close();
+    }
 
 }
